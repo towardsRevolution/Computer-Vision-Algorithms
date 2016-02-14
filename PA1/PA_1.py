@@ -61,6 +61,7 @@ def main():
 
     plt.figure(1)
     plt.subplot(221)
+    plt.title("Images for RGB Channels")
     plt.ylabel("Blue Channel-->")
     plt.imshow(img_Blue_Channel,'Blues',aspect='equal')
 
@@ -91,8 +92,8 @@ def main():
     gray_blue = img_Blue_Channel - img_gray2
 
     plt.figure(2)
-    plt.title("Arithmetic Operations on the image")
     plt.subplot(321)
+    plt.title("Arithmetic Operations on the image")
     plt.imshow(blue_Red,aspect='equal',cmap=plt.cm.gray)
     plt.ylabel("B + R")
 
@@ -181,7 +182,7 @@ def main():
         for cols in range(details[1]):
             newImage[rows,cols] = hist_Eq[(img_gray[rows,cols]*(L-1)).__int__()]
 
-    print("Image Dimensions: ",newImage.shape)
+    print "Image Dimensions: ",newImage.shape
     plt.title("Image after Histogram Equalization")
     plt.imshow(newImage,cmap=plt.cm.gray)
     plt.show()
