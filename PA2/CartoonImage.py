@@ -1,7 +1,7 @@
 """
 This program generates a cartoon image from a regular image by generating
 canny edge detected image and bilateral filtered image from the same and
-bitwise ANDing both.
+bitwise ANDing both with each other.
 """
 
 import cv2,math
@@ -35,6 +35,7 @@ def bilateralFilter(img, kSize, sigmaColor, sigmaSpace, borderType=cv2.BORDER_DE
     img_gray = np.sum(img * rgb,axis=-1)/255
     img_gray*=255
     channel=0
+    #Since the Kernel is 3x3
     kSize=kSize//3
     I_filtered = img
 
@@ -57,15 +58,16 @@ def bilateralFilter(img, kSize, sigmaColor, sigmaSpace, borderType=cv2.BORDER_DE
 
                     mid = len(neighborhood1D)//2
                     Wp = np.cumsum((fr *(neighborhood1D-neighborhood1D[mid]))
-                                                * (gs) * distance.euclidean(neighborhood1D,neighborhood1D[mid])) #* )
+                                                * (gs)) #* )
+                    WpIndex = Wp.size - 1
+                    Wp[WpIndex]*=distance.euclidean(neighborhood1D,neighborhood1D[mid])
 
                     bilOperation= np.cumsum(neighborhood1D * (fr * (neighborhood1D-neighborhood1D[mid]))
-                                                * (gs) * distance.euclidean(neighborhood1D,neighborhood1D[mid])) #
-                    WpIndex = Wp.size - 1
+                                                * (gs)) #
                     bilOperationIndex = bilOperation.size - 1
+                    bilOperation[bilOperationIndex]*=distance.euclidean(neighborhood1D,neighborhood1D[mid])
                     x = rows+((neighborhood.shape)[0]//2)
                     y = columns+((neighborhood.shape)[1]//2)
-                    # print("X: ", x, "Y: ", y)
                     if Wp[WpIndex] != 0 and x < details[0] and y < details[1]:
                         I_filtered[x,y,channel] = bilOperation[bilOperationIndex]/Wp[WpIndex]
                     elif x >= details[0] and y >= details[1]:
@@ -194,9 +196,11 @@ def Canny(img, thresh1, thresh2, L2norm):
             else:
                 netGradient[row,column] = 255
 
-    netGradient = cv2.adaptiveThreshold(cv2.cvtColor(img,cv2.COLOR_BGR2GRAY), 255,
-                                  adaptiveMethod=cv2.ADAPTIVE_THRESH_MEAN_C,thresholdType=cv2.THRESH_BINARY,blockSize=3
-                                  ,C=2)
+    #"netgradient" contains the final canny edge detected image
+    # netGradient = cv2.adaptiveThreshold(cv2.cvtColor(img,cv2.COLOR_BGR2GRAY), 255,
+    #                               adaptiveMethod=cv2.ADAPTIVE_THRESH_MEAN_C,thresholdType=cv2.THRESH_BINARY,blockSize=3
+    #                               ,C=2)
+    netGradient = cv2.Canny(img,100,200,True)
     return netGradient
 
 def cartoonImage(filtered, edges):
@@ -208,7 +212,7 @@ def cartoonImage(filtered, edges):
     """
     #TODO: Create a cartoon image
     color_edge = cv2.cvtColor(edges,cv2.COLOR_GRAY2BGR)
-    cartoon = cv2.bitwise_and(filtered,color_edge)
+    cartoon = cv2.bitwise_and(filtered,255-color_edge)
     return cartoon
 
 def RMSerror(img1, img2):
@@ -226,7 +230,7 @@ def RMSerror(img1, img2):
     return RMSE
 
 if __name__ == '__main__':
-    img = cv2.imread("Castle.jpg")
+    img = cv2.imread("castle.jpg")
     bilat = bilateralFilter(img, 9, 50, 100)
     cvbilat = cv2.bilateralFilter(img, 9, 50, 100)
     print "Bilateral Filter RMSE: "+str(RMSerror(bilat, cvbilat))
