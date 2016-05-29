@@ -1,0 +1,1 @@
+Simply run the code and press enter on encountering an image to display the next image. For plots, close the window to open the next plot window. I have not displayed an image having all keypoints obtained on executing the SURF since our aim was to compare the best 5 features of SURF with HoG (since only 5 key points were given for implementing HoG). 

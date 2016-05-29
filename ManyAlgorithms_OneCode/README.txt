@@ -1,0 +1,1 @@
+Run the code and enter the problem numbers from 1 to 7 to get the output image or video. Make sure that the images and the video is the same folder as "final.py".
